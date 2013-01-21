@@ -1,0 +1,18 @@
+{
+  "name":"Linker",
+  "description":"Makes linking and diagramming easier and faster",
+  "version":"1.0",
+  "launch_path": "/Linker/index.html",
+  "icons":{
+    "16":"http://dopt.github.com/WhatsNext/image/icon-16.png",
+    "48":"http://dopt.github.com/WhatsNext/image/icon-48.png",
+    "52":"http://dopt.github.com/WhatsNext/image/icon-52.png",
+    "128":"http://dopt.github.com/WhatsNext/image/icon-128.png"
+  },
+  "installs_allowed_from":[
+    "*"
+  ],
+  "developer":{
+    "name":"Dopt"
+  }
+}
