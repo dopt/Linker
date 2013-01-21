@@ -12,7 +12,9 @@ var oh = 0;//original height
 
 var is_drag = false;
 var is_resizing = false;
+var lining = false;
 var linking = false;
+var lining_select = 0;
 var resize_dir;
 var shapes = [];
 var links = [];
@@ -85,9 +87,10 @@ function tool_box_reset(){
 	new_content += "<span id='q2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/quad.png' width='15'></span>";//quadrilateral
 	new_content += "<span id='p2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/paral.png' width='15'></span>";//parellellogram
 	new_content += "<span id='d2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/diamond.png' width='15'></span>";//diamond
-	new_content += "<br/>Line 90&#176;";
-	new_content += "<input id='line_type' type='checkbox' >";
-	new_content += " Arrow<input id='has_arrow' type='checkbox' checked='checked'>";
+	new_content += "<br/>";
+	new_content += "<input name='line' id='line_type' type='radio' >Line 90&#176;";
+	new_content += " Arrow<input id='has_arrow' type='checkbox' checked='checked'><br/>";
+	new_content += "<input name='line' id='top_down_type' type='radio'>Top-Down";
 	new_content += "</div>";
 	
 	new_content += "<button onclick='create_tail();'>Create Tail</button><br/>";
@@ -116,11 +119,20 @@ function mouse_set(){
 		mouse_y = mousePos.y;
 		document.getElementById("mouse_track").innerHTML = mouse_x+", "+mouse_y;
 		//reset
-		if(!linking)
+		if(!linking && !lining)
 			document.body.style.cursor = "auto";
 		
 		for(i in shapes){
 			if(shapes[i].selected == true){
+				//sense line touch
+				var touched_line = false;
+				for(j in links){
+					if(links[j].Touched()){
+						touched_line = true;
+						break;
+					}
+				}
+			
 				//branches below is for change cursor type
 				if(linking){
 					document.body.style.cursor = "crosshair";
@@ -159,6 +171,8 @@ function mouse_set(){
 					}
 				} else if(shapes[i].Touched()){
 					document.body.style.cursor = "move";
+				} else if(touched_line){
+					document.body.style.cursor = "n-resize";
 				}
 				
 				//branches below is operation with cursor
@@ -284,6 +298,9 @@ function mouse_set(){
 								break;
 						}
 					}
+				} else if(lining){
+					//move the line
+					links[lining_select].base_line = oy + mouse_y - drag_y;
 				} else if(is_drag){
 					//moving the selected object
 					shapes[i].x = ox + mouse_x - drag_x;
@@ -298,6 +315,20 @@ function mouse_set(){
 	
 	canvas.addEventListener('mousedown', function(e){
 		is_drag = true;
+		
+		//check line touched
+		for(j in links){
+			if(links[j].Touched()){
+				lining = true;
+				lining_select = j;
+				drag_x = mouse_x;
+				drag_y = mouse_y;
+				links[j].user_resize = true;
+				//ox = shapes[i].x;
+				oy = links[j].base_line;
+			}
+		}
+		
 		//close advance box
 		document.getElementById('advance_box').className = 'hide';
 		
@@ -345,7 +376,7 @@ function mouse_set(){
 		
 		//deselect all the shapes
 		for(i in shapes){
-			if(shapes[i].selected){
+			if(shapes[i].selected && !lining){
 				selected_effect(false, i);
 				document.getElementById('head_name').value = "";
 			}
@@ -353,7 +384,7 @@ function mouse_set(){
 		
 		//select the intercepted element
 		for(i in shapes){
-			if((shapes[i].Touched() || touched_border(i) != "none") && is_resizing == false){//intersected with mouse
+			if((shapes[i].Touched() || touched_border(i) != "none") && !is_resizing && !lining){//intersected with mouse
 				selected_effect(true, i);
 				drag_x = mouse_x;
 				drag_y = mouse_y;
@@ -368,11 +399,13 @@ function mouse_set(){
 				break;
 			}
 		}
+		
 	}, false);
 	
 	canvas.addEventListener('mouseup', function(e){
 		is_drag = false;
 		is_resizing = false;
+		lining = false;
 	}, false);
 	
 	canvas.addEventListener('dblclick', function(e){
@@ -536,7 +569,10 @@ function create_tail(){
 	
 	//create linker
 	var linker;
-	if(document.getElementById("line_type").checked){
+	if(document.getElementById("top_down_type").checked){
+		//new type of line
+		linker = new Td_Arrow(head, shapes.length-1);
+	} else if(document.getElementById("line_type").checked){
 		linker = new S_Arrow(head, shapes.length-1);
 	} else {
 		linker = new Arrow(head, shapes.length-1);
@@ -944,7 +980,19 @@ function S_Arrow(a, b){//straight arrow
 	this.name = "s_arrow";
 	this.mode = "v";//vertical 1st
 	this.arrow = true;
-	this.value = "-";
+	this.value = '-';
+}
+
+function Td_Arrow(a, b){//top down type arrow
+	this.s1 = a;
+	this.s2 = b;
+	this.name = "td_arrow";
+	this.arrow = true;
+	this.value = '-';
+	
+	this.base_line = 0;
+	this.ox = shapes[a].x;//ox is used to detect a have change position or not
+	this.user_resize = false;//check user have resize manually
 }
 
 Arrow.prototype.Draw = function(){
@@ -1067,7 +1115,60 @@ S_Arrow.prototype.Draw = function(){
 	ctx.stroke();
 }
 
+Td_Arrow.prototype.Draw = function(){
+	var center_x1 = shapes[this.s1].x + shapes[this.s1].width/2;
+	var center_y1 = shapes[this.s1].y + shapes[this.s1].height/2;
+	var center_x2 = shapes[this.s2].x + shapes[this.s2].width/2;
+	var center_y2 = shapes[this.s2].y + shapes[this.s2].height/2;
+	
+	//base line update
+	if(this.ox != shapes[this.s1].x || !this.user_resize){
+		this.ox = shapes[this.s1].x;
+		this.user_resize = false;
+		
+		if(center_y1 < center_y2)
+			this.base_line = shapes[this.s1].y + shapes[this.s1].height + 100;
+		else 
+			this.base_line = shapes[this.s1].y - 100;
+	}
+	//arrow
+	
+	//line
+	ctx.moveTo(center_x1, center_y1);
+	ctx.lineTo(center_x1, this.base_line);
+	ctx.lineTo(center_x2, this.base_line);
+	ctx.lineTo(center_x2, center_y2);
+	ctx.strokeStyle = "black";
+	ctx.stroke();
+}
 
+Arrow.prototype.Touched = function(){
+	return false;
+}
+
+S_Arrow.prototype.Touched = function(){
+	return false;
+}
+
+Td_Arrow.prototype.Touched = function(){
+	var center_x1 = shapes[this.s1].x + shapes[this.s1].width/2;
+	var center_y1 = shapes[this.s1].y + shapes[this.s1].height/2;
+	var center_x2 = shapes[this.s2].x + shapes[this.s2].width/2;
+	var center_y2 = shapes[this.s2].y + shapes[this.s2].height/2;
+	var left, right;
+	if(center_x1 < center_x2){
+		left = center_x1;
+		right = center_x2;
+	} else {
+		left = center_x2;
+		right = center_x1;
+	}
+	//if x is bet left and right
+	if(mouse_x > left && mouse_x < right && mouse_y > this.base_line - 9 && mouse_y < this.base_line + 9){
+		return true;
+	}
+	return false;
+}
 
 function getShape(id){
 	var head_name = document.getElementById('head_name').value;
@@ -1293,7 +1394,10 @@ function delete_head(){
 		}
 	}
 	selected_effect(false, head);
-	delete shapes[head];
+	//delete bug replacement(temporary)
+	shapes[head].x = -1000;
+	shapes[head].y = -1000;
+	//-------------------------------
 	close_advance_box();
 }
 
@@ -1317,11 +1421,13 @@ function show_links(){
 			new_content += "<td>"+tail.name+"</td>";
 			if(links[i].name == "arrow"){
 				new_content += "<td><span onclick='toggle_degree("+i+");'><img src='img/arrow.png' width='13'></span></td>";
-			} else {
+			} else if(links[i].name == "s_arrow"){
 				if(links[i].mode == 'h')
 					new_content += "<td><span onclick='toggle_degree("+i+");'><img src='img/harrow.png' width='13'></span></td>";
 				else 
 					new_content += "<td><span onclick='toggle_degree("+i+");'><img src='img/varrow.png' width='13'></span></td>";
+			} else {
+				new_content += "<td><span onclick='toggle_degree("+i+");'><img src='img/tdarrow.png' width='20'></span></td>";
 			}
 			if(links[i].arrow){
 				new_content += "<td><button onclick='toggle_arrow(this.value);' value='"+i+"'>Yes</button></td>";
@@ -1353,14 +1459,16 @@ function toggle_degree(id){
 	var tail = links[id].s2;
 	if(links[id].name == "arrow"){
 		linker = new S_Arrow(head, tail);
-	} else {
+	} else if(links[id].name == "s_arrow"){
 		if(links[id].mode == "v"){
 			linker = new S_Arrow(head, tail);
 			linker.mode = "h";
 			linker.value = links[id].value;
 		} else {
-			linker = new Arrow(head, tail);
+			linker = new Td_Arrow(head, tail);
 		}
+	} else {
+		linker = new Arrow(head, tail);
 	}
 	links[id] = linker;
 	//refresh
