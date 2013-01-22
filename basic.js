@@ -15,6 +15,8 @@ var oh = 0;//original height
 var is_drag = false;
 var is_resizing = false;
 var body_resizing = false;
+var tool_repos = false;
+var adv_repos = false;
 var lining = false;
 var linking = false;
 var lining_select = 0;
@@ -36,6 +38,7 @@ function init(){
 	canvas = document.getElementById("draw_board");
 	ctx = canvas.getContext("2d");
 	tool_box_reset();
+	//advance_box_init();
 	adjust_frame();
 	mouse_set();
 	
@@ -67,6 +70,45 @@ function init(){
 	$("#link_mini").click(function(){
 		$("#minimize_tool").fadeToggle();
 	});
+	
+	//change cursor
+	$("#link_repos").hover(function(){
+		document.body.style.cursor = "move";
+	});
+	
+	$("#link_repos").mouseout(function(){
+		document.body.style.cursor = "auto";
+	});
+	
+	//activate reposition
+	$("#link_repos").mousedown(function(e){
+		drag_x = e.pageX;
+		drag_y = e.pageY;
+		body_x = $("#tool_box").position().left;
+		body_y = $("#tool_box").position().top;
+		tool_repos = true;
+	});
+	
+	//repositioning
+	$("body").mousemove(function(e){
+		if(tool_repos){
+			var new_x = body_x + e.pageX - drag_x;
+			var new_y = body_y + e.pageY - drag_y;
+			$("#tool_box").css("left", new_x);
+			$("#tool_box").css("top", new_y);
+		} else if(adv_repos){
+			var new_x = body_x + e.pageX - drag_x;
+			var new_y = body_y + e.pageY - drag_y;
+			$("#advance_box").css("left", new_x);
+			$("#advance_box").css("top", new_y);
+		}
+	});
+	
+	//deactivate reposition
+	$("body").mouseup(function(e){
+		tool_repos = false;
+		adv_repos = false;
+	});
 }
 
 function adjust_frame(){
@@ -96,7 +138,7 @@ function tog_tool_box(){
 function tool_box_reset(){
 	var new_content = "";
 	new_content += "<button id='link_mini'>-</button>";
-	new_content += "<b>Link Box</b><br/>";
+	new_content += "<span id='link_repos'><b>Link Box</b></span><br/>";
 	
 	new_content += "<span id='minimize_tool'>";
 	
@@ -1434,7 +1476,7 @@ function change_font2(){
 }
 
 function advance_box_init(){
-	var head;
+	var head = -1;
 	for(i in shapes){
 		if(shapes[i].selected){
 			head = i;
@@ -1455,33 +1497,36 @@ function advance_box_init(){
 	font_list.push("Tahoma");
 	font_list.push("Trebuchet MS");
 	font_list.push("Verdana");
-	var new_content = "<button id='adv_box_mini'>-</button><button onclick='close_advance_box();'>X</button><b>Advance Link Box</b><br/>";
+	var new_content = "<button id='adv_box_mini'>-</button><button onclick='close_advance_box();'>X</button>";
+	new_content += "<span id='adv_repos'><b>Advance Link Box</b></span><br/>";
 	
 	new_content += "<div id='minimize_adv'>";//this div is for minimize/maximize purpose
 	
-	new_content += "<button onclick='direct_link("+head+");'>Direct link</button>";
-	new_content += "<div style='margin-left:15px;'>";
-	new_content += "<input name='adv_new_line' id='adv_line_type' type='radio'>Line 90&#176; Arrow<input id='adv_arrow' type='checkbox' checked='checked'><br/>";
-	new_content += "<input name='adv_new_line' id='adv_td_type' type='radio'>Top-Down";
-	new_content += "</div>";
-	
-	new_content += "<button onclick='change_font();'>Change Font-family</button>";
-	new_content += "<div style='margin-left:15px;'>";
-	new_content += "<select id='new_font'>";
-	new_content += "<option value='"+shapes[head].font+"'>"+shapes[head].font+"</option>";
-	for(i in font_list){
-		if(font_list[i] != shapes[head].font)
-			new_content += "<option value='"+font_list[i]+"'>"+font_list[i]+"</option>";
+	if(head != -1){
+		new_content += "<button onclick='direct_link("+head+");'>Direct link</button>";
+		new_content += "<div style='margin-left:15px;'>";
+		new_content += "<input name='adv_new_line' id='adv_line_type' type='radio'>Line 90&#176; Arrow<input id='adv_arrow' type='checkbox' checked='checked'><br/>";
+		new_content += "<input name='adv_new_line' id='adv_td_type' type='radio'>Top-Down";
+		new_content += "</div>";
+		
+		new_content += "<button onclick='change_font();'>Change Font-family</button>";
+		new_content += "<div style='margin-left:15px;'>";
+		new_content += "<select id='new_font'>";
+		new_content += "<option value='"+shapes[head].font+"'>"+shapes[head].font+"</option>";
+		for(i in font_list){
+			if(font_list[i] != shapes[head].font)
+				new_content += "<option value='"+font_list[i]+"'>"+font_list[i]+"</option>";
+		}
+		new_content += "</select>";
+		new_content += "</div>";
+		
+		new_content += "<span id='links_tog'><button onclick='show_links();'>Show Link(s)</button></span><div id='modify_links' style='margin-left:15px;'></div>";
+		
+		new_content += "<button onclick='delete_head();'>Delete Head</button>";
+		new_content += "<div style='margin-left:15px;'>";
+		new_content += "Confirm<input type='checkbox' id='delete_confirm'>";
+		new_content += "</div>";
 	}
-	new_content += "</select>";
-	new_content += "</div>";
-	
-	new_content += "<span id='links_tog'><button onclick='show_links();'>Show Link(s)</button></span><div id='modify_links' style='margin-left:15px;'></div>";
-	
-	new_content += "<button onclick='delete_head();'>Delete Head</button>";
-	new_content += "<div style='margin-left:15px;'>";
-	new_content += "Confirm<input type='checkbox' id='delete_confirm'>";
-	new_content += "</div>";
 	
 	new_content += "</div>";
 	
@@ -1491,6 +1536,23 @@ function advance_box_init(){
 		$("#minimize_adv").fadeToggle();
 	});
 	
+	//change cursor
+	$("#adv_repos").hover(function(){
+		document.body.style.cursor = "move";
+	});
+	
+	$("#adv_repos").mouseout(function(){
+		document.body.style.cursor = "auto";
+	});
+	
+	//activate reposition
+	$("#adv_repos").mousedown(function(e){
+		drag_x = e.pageX;
+		drag_y = e.pageY;
+		body_x = $("#advance_box").position().left;
+		body_y = $("#advance_box").position().top;
+		adv_repos = true;
+	});
 }
 
 function tog_adv_box(){
