@@ -1302,7 +1302,7 @@ Td_Arrow.prototype.Touched = function(){
 function getShape(id){
 	var head_name = document.getElementById('head_name').value;
 	var tail_name = document.getElementById('tail_name').value;
-	var new_x = canvas.width - 150, new_y = 480;
+	var new_x = canvas.width - 120, new_y = canvas.height - 120;
 	var object;
 	switch(id){
 		case "c1":
