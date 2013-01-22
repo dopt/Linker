@@ -27,6 +27,12 @@ var link_box_record;
 var mouse_over_toolbox = false;
 
 function init(){
+	//jquery installation(used another way)
+	/*var script = document.createElement('script');
+	script.src = 'http://jqueryjs.googlecode.com/files/jquery-1.2.6.min.js';
+	script.type = 'text/javascript';
+	document.getElementsByTagName('head')[0].appendChild(script);*/
+
 	canvas = document.getElementById("draw_board");
 	ctx = canvas.getContext("2d");
 	tool_box_reset();
