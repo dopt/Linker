@@ -19,6 +19,9 @@ var resize_dir;
 var shapes = [];
 var links = [];
 
+var adv_box_record;
+var link_box_record;
+
 function init(){
 	canvas = document.getElementById("draw_board");
 	ctx = canvas.getContext("2d");
@@ -57,10 +60,21 @@ function adjust_frame(){
     ctx.canvas.height = window.innerHeight-30;
 }
 
+function tog_tool_box(){
+	if(document.getElementById('minimize_tool').innerHTML != ""){
+		link_box_record = document.getElementById('minimize_tool').innerHTML;
+		document.getElementById('minimize_tool').innerHTML = "";
+	} else {
+		document.getElementById('minimize_tool').innerHTML = link_box_record;
+	}
+}
+
 function tool_box_reset(){
 	var new_content = "";
-	new_content += "<button>-</button>";
+	//new_content += "<button onclick='tog_tool_box();'>-</button>";
 	new_content += "<b>Link Box</b><br/>";
+	
+	new_content += "<span id='minimize_tool'>";
 	
 	new_content += "<i>Head</i>";
 	
@@ -101,6 +115,8 @@ function tool_box_reset(){
 	new_content += "<button onclick='clean_canvas();'>New</button>";
 	//new_content += "<button>Open</button>";
 	new_content += "<button onclick='save_img();'>Save</button>";
+	
+	new_content += "</span>";
 	
 	document.getElementById("tool_box").innerHTML = new_content;
 }
@@ -336,6 +352,7 @@ function mouse_set(){
 		if(linking){
 			var line_90 = document.getElementById('adv_line_type').checked;
 			var arrow = document.getElementById('adv_arrow').checked;
+			var td_arrow = document.getElementById('adv_td_type').checked;
 			
 			var head = -1;
 			for(i in shapes){
@@ -360,6 +377,8 @@ function mouse_set(){
 				var linker;
 				if(line_90){
 					linker = new S_Arrow(head, tail);
+				} else if(td_arrow){
+					linker = new Td_Arrow(head, tail);
 				} else {
 					linker = new Arrow(head, tail);
 				}
@@ -1326,11 +1345,14 @@ function advance_box_init(){
 	font_list.push("Tahoma");
 	font_list.push("Trebuchet MS");
 	font_list.push("Verdana");
-	var new_content = "<button onclick='close_advance_box();'>X</button><b>Advance Link Box</b><br/>";
+	var new_content = "<button onclick='tog_adv_box();'>-</button><button onclick='close_advance_box();'>X</button><b>Advance Link Box</b><br/>";
+	
+	new_content += "<div id='minimize_adv'>";//this div is for minimize/maximize purpose
 	
 	new_content += "<button onclick='direct_link("+head+");'>Direct link</button>";
 	new_content += "<div style='margin-left:15px;'>";
-	new_content += "Line 90&#176;<input id='adv_line_type' type='checkbox'> Arrow<input id='adv_arrow' type='checkbox' checked='checked'>";
+	new_content += "<input name='adv_new_line' id='adv_line_type' type='radio'>Line 90&#176; Arrow<input id='adv_arrow' type='checkbox' checked='checked'><br/>";
+	new_content += "<input name='adv_new_line' id='adv_td_type' type='radio'>Top-Down";
 	new_content += "</div>";
 	
 	new_content += "<button onclick='change_font();'>Change Font-family</button>";
@@ -1344,14 +1366,25 @@ function advance_box_init(){
 	new_content += "</select>";
 	new_content += "</div>";
 	
-	new_content += "<button onclick='show_links();'>Show Link(s)</button><div id='modify_links' style='margin-left:15px;'></div>";
+	new_content += "<span id='links_tog'><button onclick='show_links();'>Show Link(s)</button></span><div id='modify_links' style='margin-left:15px;'></div>";
 	
 	new_content += "<button onclick='delete_head();'>Delete Head</button>";
 	new_content += "<div style='margin-left:15px;'>";
 	new_content += "Confirm<input type='checkbox' id='delete_confirm'>";
 	new_content += "</div>";
 	
+	new_content += "</div>";
+	
 	document.getElementById("advance_box").innerHTML = new_content;
+}
+
+function tog_adv_box(){
+	if(document.getElementById('minimize_adv').innerHTML != ""){
+		adv_box_record = document.getElementById('minimize_adv').innerHTML;
+		document.getElementById('minimize_adv').innerHTML = "";
+	} else {
+		document.getElementById('minimize_adv').innerHTML = adv_box_record;
+	}
 }
 
 function close_advance_box(){
@@ -1401,7 +1434,18 @@ function delete_head(){
 	close_advance_box();
 }
 
+function hide_links(){
+	//change button name
+	document.getElementById('links_tog').innerHTML = 
+		"<button onclick='show_links();'>Show Link(s)</button>";
+	document.getElementById("modify_links").innerHTML = "";
+}
+
 function show_links(){
+	//change button name
+	document.getElementById('links_tog').innerHTML = 
+		"<button onclick='hide_links();'>Hide Link(s)</button>";
+	
 	var head;
 	var extra = true;
 	for(i in shapes){
