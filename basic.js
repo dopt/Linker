@@ -63,6 +63,10 @@ function init(){
 			}
 		}
 	}
+	
+	$("#link_mini").click(function(){
+		$("#minimize_tool").fadeToggle();
+	});
 }
 
 function adjust_frame(){
@@ -91,7 +95,7 @@ function tog_tool_box(){
 
 function tool_box_reset(){
 	var new_content = "";
-	//new_content += "<button onclick='tog_tool_box();'>-</button>";
+	new_content += "<button id='link_mini'>-</button>";
 	new_content += "<b>Link Box</b><br/>";
 	
 	new_content += "<span id='minimize_tool'>";
@@ -1451,7 +1455,7 @@ function advance_box_init(){
 	font_list.push("Tahoma");
 	font_list.push("Trebuchet MS");
 	font_list.push("Verdana");
-	var new_content = "<button onclick='tog_adv_box();'>-</button><button onclick='close_advance_box();'>X</button><b>Advance Link Box</b><br/>";
+	var new_content = "<button id='adv_box_mini'>-</button><button onclick='close_advance_box();'>X</button><b>Advance Link Box</b><br/>";
 	
 	new_content += "<div id='minimize_adv'>";//this div is for minimize/maximize purpose
 	
@@ -1482,6 +1486,11 @@ function advance_box_init(){
 	new_content += "</div>";
 	
 	document.getElementById("advance_box").innerHTML = new_content;
+	
+	$("#adv_box_mini").click(function(){
+		$("#minimize_adv").fadeToggle();
+	});
+	
 }
 
 function tog_adv_box(){
