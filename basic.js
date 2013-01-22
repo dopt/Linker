@@ -2,6 +2,8 @@ var canvas;
 var ctx;//context
 var mouse_x = 0;
 var mouse_y = 0;
+var body_x = 0;
+var body_y = 0;
 
 var drag_x = 0;
 var drag_y = 0;
@@ -12,6 +14,7 @@ var oh = 0;//original height
 
 var is_drag = false;
 var is_resizing = false;
+var body_resizing = false;
 var lining = false;
 var linking = false;
 var lining_select = 0;
@@ -21,12 +24,13 @@ var links = [];
 
 var adv_box_record;
 var link_box_record;
+var mouse_over_toolbox = false;
 
 function init(){
 	canvas = document.getElementById("draw_board");
 	ctx = canvas.getContext("2d");
-	adjust_frame();
 	tool_box_reset();
+	adjust_frame();
 	mouse_set();
 	
 	setInterval(draw, 1);
@@ -58,6 +62,16 @@ function init(){
 function adjust_frame(){
 	ctx.canvas.width  = window.innerWidth-30;
     ctx.canvas.height = window.innerHeight-30;
+	document.getElementById("c_width").value = canvas.width;
+	document.getElementById("c_height").value = canvas.height;
+}
+
+function manually_adjust_frame(id){
+	if(id == "c_width"){
+		canvas.width = document.getElementById("c_width").value;
+	} else if(id == "c_height"){
+		canvas.height = document.getElementById("c_height").value;
+	}
 }
 
 function tog_tool_box(){
@@ -109,9 +123,10 @@ function tool_box_reset(){
 	
 	new_content += "<button onclick='create_tail();'>Create Tail</button><br/>";
 	
-	new_content += "<div id='mouse_track'>0, 0</div>";
+	//new_content += "<div id='mouse_track'>0, 0</div>";
 	
-	new_content += "<br/>";
+	new_content += "Width<input id='c_width' style='width:30px;' onkeyup='manually_adjust_frame(id)'>";
+	new_content += "Height<input id='c_height' style='width:30px;' onkeyup='manually_adjust_frame(id)'>";
 	new_content += "<button onclick='clean_canvas();'>New</button>";
 	//new_content += "<button>Open</button>";
 	new_content += "<button onclick='save_img();'>Save</button>";
@@ -127,7 +142,88 @@ function clean_canvas(){
 	links = [];
 }
 
-function mouse_set(){
+function touch_canvas_border(e){
+	if(body_x > ctx.canvas.width+5 - 5 && body_x < ctx.canvas.width+5 + 5){
+		if(body_y > ctx.canvas.height+5 - 5 && body_y < ctx.canvas.height+5 + 5){
+			return "BR";
+		} else {
+			return "R";
+		}
+	} else if(body_y > ctx.canvas.height+5 - 5 && body_y < ctx.canvas.height+5 + 5){
+		return "B";
+	}
+	
+	return false;
+}
+
+function mouse_set(){	
+	//var body = document.getElementsByTagName("body")[0];
+	//var body = document.getElementById("body");
+	var tool_box = document.getElementById("tool_box");
+	
+	/*body.addEventListener('mousemove', function(e){
+		body_x = e.clientX;
+		body_y = e.clientY;
+	
+		//change cursor if touch border
+		if(touch_canvas_border(e)){
+			switch(touch_canvas_border(e)){
+				case "R":
+					document.body.style.cursor = "w-resize";
+					break;
+				case "BR":
+					document.body.style.cursor = "se-resize";
+					break;
+				case "B":
+					document.body.style.cursor = "s-resize";
+					break;
+			}
+			
+		} else if(mouse_over_toolbox){
+			document.body.style.cursor = "auto";
+		}
+		
+		//resizing if resizing started
+		if(body_resizing){
+			switch(resize_dir){
+				case "R":
+					canvas.width = body_x;
+					break;
+				case "BR":
+					canvas.width = body_x;
+					canvas.height = body_y;
+					break;
+				case "B":
+					canvas.height = body_y;
+					break;
+			}
+		}
+	}, false);
+	
+	body.addEventListener('mousedown', function(e){
+		//resize start if touch border and click
+		if(touch_canvas_border(e)){
+			resize_dir = touch_canvas_border(e);
+			ow = canvas.width;
+			oh = canvas.height;
+			drag_x = body_x;
+			drag_y = body_y;
+			body_resizing = true;
+		}
+	}, false);
+	
+	body.addEventListener('mouseup', function(e){
+		body_resizing = false;
+	}, false);
+	
+	tool_box.addEventListener('mouseover', function(e){
+		mouse_over_toolbox = true;
+	}, false);
+	
+	tool_box.addEventListener('mouseout', function(e){
+		mouse_over_toolbox = false;
+	}, false);*/
+	
 	canvas.addEventListener('mousemove', function(e){
 		//update mouse position
 		var mousePos = getMousePos(canvas, e);
@@ -1145,10 +1241,14 @@ Td_Arrow.prototype.Draw = function(){
 		this.ox = shapes[this.s1].x;
 		this.user_resize = false;
 		
-		if(center_y1 < center_y2)
+		//option1(between 2 y)
+		this.base_line = (center_y1 + center_y2)/2; 
+		
+		//option2(fixed y)
+		/*if(center_y1 < center_y2)
 			this.base_line = shapes[this.s1].y + shapes[this.s1].height + 100;
 		else 
-			this.base_line = shapes[this.s1].y - 100;
+			this.base_line = shapes[this.s1].y - 100;*/
 	}
 	//arrow
 	
