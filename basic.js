@@ -123,7 +123,7 @@ function tool_box_reset(){
 	
 	new_content += "<button onclick='create_tail();'>Create Tail</button><br/>";
 	
-	//new_content += "<div id='mouse_track'>0, 0</div>";
+	new_content += "<div id='mouse_track'>0, 0</div>";
 	
 	new_content += "Width<input id='c_width' style='width:30px;' onkeyup='manually_adjust_frame(id)'>";
 	new_content += "Height<input id='c_height' style='width:30px;' onkeyup='manually_adjust_frame(id)'>";
