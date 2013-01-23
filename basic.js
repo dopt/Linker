@@ -1485,6 +1485,85 @@ Manual_Input.prototype.Touched = function(){
 	return false;
 }
 
+function Document(x, y, name){
+	this.x = x;
+	this.y = y;
+	this.name = name;
+	//default
+	this.width = 100;
+	this.height = 70;
+	
+	this.border = "black";
+	this.color = "white";
+	this.detail = "";
+	this.tails = [];
+	this.selected = false;
+	this.fsize = -1;
+	this.font = "Trebuchet MS";
+	//special
+	this.shape = "M";
+}
+
+Document.prototype.Draw = function(){
+	var center_x = this.x + this.width/2;
+	var center_y = this.y + this.height/2;
+	
+	//shape
+	ctx.beginPath();
+	ctx.moveTo(this.x, this.y + this.height - 20);
+	ctx.bezierCurveTo(this.x, this.y+this.height, this.x+this.width/2, this.y+this.height, this.x+this.width/2, this.y+this.height-20);
+	ctx.bezierCurveTo(this.x+this.width/2, this.y+this.height-40, this.x+this.width, this.y+this.height-40, this.x+this.width, this.y+this.height-30);
+	ctx.lineTo(this.x+this.width, this.y);
+	ctx.lineTo(this.x, this.y);
+	ctx.lineTo(this.x, this.y+this.height-20);
+	ctx.fillStyle = this.color;
+	ctx.fill();
+	ctx.fillStyle = this.border;
+	ctx.stroke();
+	ctx.closePath();
+	
+	//text
+	var font_size = Number(this.fsize);
+	if(font_size == -1){//auto
+		font_size = 30;
+		while(font_size * this.name.length > this.width*2){
+			font_size--;
+		}	
+	} 
+	ctx.font = font_size+"px "+this.font;
+	ctx.textAlign = 'center';
+	ctx.fillStyle = this.border;
+	//one line
+	if(this.name.indexOf("\n") == -1){
+		ctx.fillText(this.name, center_x, center_y);
+		return;
+	}
+	//multiple line
+	var copy_name = this.name;
+	var nl_count = 0;
+	while(copy_name.indexOf("\n") != -1){
+		copy_name = copy_name.substr(copy_name.indexOf("\n") + 1);
+		nl_count++;
+	}
+	var start_y = center_y - nl_count * (font_size/2);
+	copy_name = this.name;
+	while(copy_name.indexOf("\n") != -1){
+		var front = copy_name.substr(0, copy_name.indexOf("\n"));
+		ctx.fillText(front, center_x, start_y);
+		copy_name = copy_name.substr(copy_name.indexOf("\n") + 1);		
+		start_y += font_size;
+	}
+	ctx.fillText(copy_name, center_x, start_y);
+}
+
+Document.prototype.Touched = function(){
+	if(mouse_x >= this.x && mouse_x <= this.x + this.width &&
+		mouse_y >= this.y && mouse_y <= this.y + this.height){
+		return true;
+	}
+	return false;
+}
+
 function Arrow(a, b){
 	this.s1 = a;
 	this.s2 = b;
@@ -1884,7 +1963,7 @@ function advance_box_init(){
 		new_content += "<span id='r3' class='selected_shapes3' onclick='shape_select3(this.id);'><img src='img/rrect.png' width='15'></span>";//Round Rect
 		new_content += "<span id='l3' class='shapes3' onclick='shape_select3(this.id);'><img src='img/delay.png' width='15'></span>";//Delay
 		new_content += "<span id='i3' class='shapes3' onclick='shape_select3(this.id);'><img src='img/manuali.png' width='15'></span>";//Manual Input
-		//new_content += "<span id='m3' class='shapes3' onclick='shape_select3(this.id);'>M</span>";//Document
+		new_content += "<span id='m3' class='shapes3' onclick='shape_select3(this.id);'><img src='img/trapez.png' width='15'></span>";//Document
 		new_content += "</div>";
 		
 		new_content += "<span id='links_tog'><button onclick='show_links();'>Show Link(s)</button></span><div id='modify_links' style='margin-left:15px;'></div>";
@@ -2143,7 +2222,7 @@ function change_shape3(){
 					//fix_bug = new Circle(-1000, -1000, "bug");
 					break;
 				case "m3":
-					object = new Parallelogram(shapes[i].x, shapes[i].y, shapes[i].name);
+					object = new Document(shapes[i].x, shapes[i].y, shapes[i].name);
 					break;
 			}
 			
