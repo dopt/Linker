@@ -4,6 +4,7 @@ var mouse_x = 0;
 var mouse_y = 0;
 var body_x = 0;
 var body_y = 0;
+var ttip_show = false;
 
 var drag_x = 0;
 var drag_y = 0;
@@ -34,7 +35,8 @@ function init(){
 	script.src = 'http://jqueryjs.googlecode.com/files/jquery-1.2.6.min.js';
 	script.type = 'text/javascript';
 	document.getElementsByTagName('head')[0].appendChild(script);*/
-
+	
+	$("#tooltip").hide();
 	canvas = document.getElementById("draw_board");
 	ctx = canvas.getContext("2d");
 	tool_box_reset();
@@ -71,13 +73,60 @@ function init(){
 		$("#minimize_tool").fadeToggle();
 	});
 	
+	$("#link_mini").hover(function(e){
+		//tooltip
+		var content = "<b>Click to minimize the box.</b>";
+		id_tooltip(content, "tool_box", "");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
+	});
+	
+	$("#chead_button").hover(function(e){
+		//tooltip
+		var content = "<b>Click to create a head.</b><br/>Head is at the top level of current branch.";
+		content += "<div style='font-size:0.7em;'>Double click after you create it for advance options</div>";
+		id_tooltip(content, "tool_box", "chead_button");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
+	});
+	
+	$("#ctail_button").hover(function(e){
+		//tooltip
+		var content = "<b>Click to create a tail.</b><br/>Tail is linked to the head you've selected.";
+		content += "<div style='font-size:0.7em;'>Double click after you create it for advance options</div>";
+		id_tooltip(content, "tool_box", "ctail_button");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
+	});
+	
+	$("#top_down_tt").hover(function(e){
+		//tooltip
+		var content = "<b>Click to select top-down type linker.</b><br/>";
+		content += "<div style='font-size:0.7em;'>Single Press for height adjustment.<br/>";
+		content += "Double click to unified the height of line from same head.</div>";
+		id_tooltip(content, "tool_box", "top_down_tt");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
+	});
+	
 	//change cursor
-	$("#link_repos").hover(function(){
+	$("#link_repos").hover(function(e){
 		document.body.style.cursor = "move";
+		//tooltip
+		var content = "<b>Press to move the box.</b>";
+		id_tooltip(content, "tool_box", "");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
 	});
 	
 	$("#link_repos").mouseout(function(){
 		document.body.style.cursor = "auto";
+		remove_tooltip();
 	});
 	
 	//activate reposition
@@ -96,6 +145,10 @@ function init(){
 			var new_y = body_y + e.pageY - drag_y;
 			$("#tool_box").css("left", new_x);
 			$("#tool_box").css("top", new_y);
+			//bugs fixer (collision of tooltip and toolbox)
+			$("#tooltip").css("left", -1000);
+			$("#tooltip").css("top", -1000);
+			$("#tooltip").hide();
 		} else if(adv_repos){
 			var new_x = body_x + e.pageX - drag_x;
 			var new_y = body_y + e.pageY - drag_y;
@@ -109,6 +162,25 @@ function init(){
 		tool_repos = false;
 		adv_repos = false;
 	});
+}
+
+function id_tooltip(content, id, id_2){
+	var new_x = $("#"+id).position().left + $("#"+id).width() + 60;
+	//var new_x = $("#"+id).position().left - 250;
+	if(new_x > $(window).width() - 250){
+		new_x = $("#"+id).position().left - 270;
+		document.getElementById('tooltip').className = "left";
+	} else {
+		document.getElementById('tooltip').className = "right";
+	}
+	var new_y = $("#"+id).position().top;
+	if(id_2 != "")
+		new_y = $("#"+id).position().top + $("#"+id_2).position().top + 10;
+	//$("#tooltip").hide();
+	$("#tooltip").html(content);
+	$("#tooltip").css("left", new_x);
+	$("#tooltip").css("top", new_y);
+	$("#tooltip").stop(true).fadeTo("normal",1);
 }
 
 function adjust_frame(){
@@ -155,7 +227,7 @@ function tool_box_reset(){
 	new_content += "Font Size <input id='font_size_form' type=text style='width:30px;' onkeyup='change_font2();'>";
 	new_content += "</div>";
 	
-	new_content += "<button onclick='create_head();'>Create Head</button><br/>";
+	new_content += "<button id='chead_button' onclick='create_head();'>Create Head</button><br/>";
 	
 	new_content += "<i>Tail</i>";
 	
@@ -168,12 +240,14 @@ function tool_box_reset(){
 	new_content += "<span id='p2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/paral.png' width='15'></span>";//parellellogram
 	new_content += "<span id='d2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/diamond.png' width='15'></span>";//diamond
 	new_content += "<br/>";
-	new_content += "<input name='line' id='line_type' type='radio' >Line 90&#176;";
+	new_content += "<button onclick='arrow_default();'>Default</button>";
 	new_content += " Arrow<input id='has_arrow' type='checkbox' checked='checked'><br/>";
-	new_content += "<input name='line' id='top_down_type' type='radio'>Top-Down";
+	new_content += "<input name='line' id='line_type' type='radio' >Line 90&#176;<br/>";
+	
+	new_content += "<span id='top_down_tt'><input name='line' id='top_down_type' type='radio'>Top-Down</span>";
 	new_content += "</div>";
 	
-	new_content += "<button onclick='create_tail();'>Create Tail</button><br/>";
+	new_content += "<button id='ctail_button' onclick='create_tail();'>Create Tail</button><br/>";
 	
 	new_content += "<div id='mouse_track'>0, 0</div>";
 	
@@ -186,6 +260,11 @@ function tool_box_reset(){
 	new_content += "</span>";
 	
 	document.getElementById("tool_box").innerHTML = new_content;
+}
+
+function arrow_default(){
+	document.getElementById('line_type').checked = false;
+	document.getElementById('top_down_type').checked = false;
 }
 
 function clean_canvas(){
@@ -333,10 +412,13 @@ function mouse_set(){
 							document.body.style.cursor = "s-resize";
 							break;
 					}
+
 				} else if(shapes[i].Touched()){
 					document.body.style.cursor = "move";
 				} else if(touched_line){
 					document.body.style.cursor = "n-resize";
+				} else {
+					
 				}
 				
 				//branches below is operation with cursor
@@ -576,10 +658,30 @@ function mouse_set(){
 	}, false);
 	
 	canvas.addEventListener('dblclick', function(e){
+		//check line touched
+		for(j in links){
+			if(links[j].Touched()){
+				lining = true;
+				links[j].user_resize = true;
+				for(k in links){
+					if(links[k].s1 == links[j].s1 && j != k){
+						//make all the lines belong to same head => same y
+						links[k].base_line = links[j].base_line;
+						links[k].user_resize = true;
+					}
+				}
+				break;
+			}
+		}
+	
 		for(i in shapes){
 			if(shapes[i].selected){
-				document.getElementById("advance_box").className = "unhide";
-				advance_box_init();
+				if(lining){
+					lining = false;
+				} else {
+					document.getElementById("advance_box").className = "unhide";
+					advance_box_init();
+				}
 			}
 		}
 	}, false);
@@ -1475,6 +1577,11 @@ function change_font2(){
 	}
 }
 
+function adv_arrow_default(){
+	document.getElementById('adv_line_type').checked = false;
+	document.getElementById('adv_td_type').checked = false;
+}
+
 function advance_box_init(){
 	var head = -1;
 	for(i in shapes){
@@ -1503,9 +1610,11 @@ function advance_box_init(){
 	new_content += "<div id='minimize_adv'>";//this div is for minimize/maximize purpose
 	
 	if(head != -1){
-		new_content += "<button onclick='direct_link("+head+");'>Direct link</button>";
+		new_content += "<button id='dirlink_button' onclick='direct_link("+head+");'>Direct link</button>";
 		new_content += "<div style='margin-left:15px;'>";
-		new_content += "<input name='adv_new_line' id='adv_line_type' type='radio'>Line 90&#176; Arrow<input id='adv_arrow' type='checkbox' checked='checked'><br/>";
+		new_content += "<button onclick='adv_arrow_default();'>Default</button>";
+		new_content += "Arrow<input id='adv_arrow' type='checkbox' checked='checked'><br/>";
+		new_content += "<input name='adv_new_line' id='adv_line_type' type='radio'>Line 90&#176;<br/>";
 		new_content += "<input name='adv_new_line' id='adv_td_type' type='radio'>Top-Down";
 		new_content += "</div>";
 		
@@ -1552,6 +1661,16 @@ function advance_box_init(){
 		body_x = $("#advance_box").position().left;
 		body_y = $("#advance_box").position().top;
 		adv_repos = true;
+	});
+	
+	$("#dirlink_button").hover(function(e){
+		//tooltip
+		var content = "<b>Click, link to a shape.</b><br/>";
+		content += "The shape you link to become a tail of current selected shape.";
+		id_tooltip(content, "advance_box", "dirlink_button");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
 	});
 }
 
