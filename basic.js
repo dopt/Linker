@@ -1431,6 +1431,7 @@ Manual_Input.prototype.Draw = function(){
 	var center_y = this.y + this.height/2;
 	
 	//shape
+	ctx.beginPath();
 	ctx.moveTo(this.x, this.y+this.height/2);
 	ctx.lineTo(this.x, this.y+this.height);
 	ctx.lineTo(this.x+this.width, this.y+this.height);
@@ -1882,7 +1883,7 @@ function advance_box_init(){
 		new_content += "<div style='margin-left:15px; margin-top:3px;'>";
 		new_content += "<span id='r3' class='selected_shapes3' onclick='shape_select3(this.id);'><img src='img/rrect.png' width='15'></span>";//Round Rect
 		new_content += "<span id='l3' class='shapes3' onclick='shape_select3(this.id);'><img src='img/delay.png' width='15'></span>";//Delay
-		//new_content += "<span id='i3' class='shapes3' onclick='shape_select3(this.id);'>I</span>";//Manual Input
+		new_content += "<span id='i3' class='shapes3' onclick='shape_select3(this.id);'><img src='img/manuali.png' width='15'></span>";//Manual Input
 		//new_content += "<span id='m3' class='shapes3' onclick='shape_select3(this.id);'>M</span>";//Document
 		new_content += "</div>";
 		
@@ -2125,7 +2126,7 @@ function delink(id){
 
 function change_shape3(){
 	var id = document.getElementsByClassName("selected_shapes3")[0].id;
-	var fix_bug;
+	//var fix_bug;(bug solved)
 	//reshape
 	for(i in shapes){
 		if(shapes[i].selected){
@@ -2139,7 +2140,7 @@ function change_shape3(){
 					break;
 				case "i3":
 					object = new Manual_Input(shapes[i].x, shapes[i].y, shapes[i].name);
-					fix_bug = new Circle(-1000, -1000, "bug");
+					//fix_bug = new Circle(-1000, -1000, "bug");
 					break;
 				case "m3":
 					object = new Parallelogram(shapes[i].x, shapes[i].y, shapes[i].name);
@@ -2162,7 +2163,7 @@ function change_shape3(){
 			shapes[i] = object;
 			
 			if(id == "i3"){
-				shapes.push(fix_bug);
+				//shapes.push(fix_bug);
 			}
 			
 			selected_effect(true, i);
