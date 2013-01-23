@@ -195,22 +195,23 @@ button:active{
 	cursor:pointer;
 }
 
-.shapes2{
+.shapes2, .shapes3{
 	margin-left:5px;
 	border:solid black;
+	//color:white;
 }
 
-.shapes2:hover{
+.shapes2:hover, .shapes3:hover{
 	cursor:pointer;
 }
 
-.selected_shapes2{
+.selected_shapes2, .selected_shapes3{
 	margin-left:5px;
 	color:lightBlue;
 	border:solid;
 }
 
-.selected_shapes2:hover{
+.selected_shapes2:hover, .selected_shapes3:hover{
 	cursor:pointer;
 }
 
