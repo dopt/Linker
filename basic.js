@@ -365,7 +365,7 @@ function mouse_set(){
 		if(!linking && !lining)
 			document.body.style.cursor = "auto";
 		
-		for(i in shapes){
+		for(i = shapes.length - 1; i >= 0; i--){
 			if(shapes[i].selected == true){
 				//sense line touch
 				var touched_line = false;
@@ -632,7 +632,7 @@ function mouse_set(){
 		}
 		
 		//select the intercepted element
-		for(i in shapes){
+		for(i = shapes.length - 1; i >= 0; i--){
 			if((shapes[i].Touched() || touched_border(i) != "none") && !is_resizing && !lining){//intersected with mouse
 				selected_effect(true, i);
 				drag_x = mouse_x;
