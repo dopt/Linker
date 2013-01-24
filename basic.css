@@ -153,8 +153,18 @@ button:active{
 	//opacity:0.8;
 	//filter:alpha(opacity=80); /* For IE8 and earlier */
 }
+#tool_box.h{
+	display:block;
+	position:fixed;
+	left:10px;
+	top:10px;
+	padding:5px;
+	color:white;
+	font-family:"Trebuchet MS";
+	background-color:black;
+}
 
-#tool_box{
+#tool_box.v{
 	display:block;
 	position:fixed;
 	right:22px;
@@ -178,7 +188,8 @@ button:active{
 
 .shapes{
 	margin-left:5px;
-	border:solid black;
+	border:solid;
+	border-color: transparent transparent transparent transparent ;
 }
 
 .shapes:hover{
@@ -197,8 +208,8 @@ button:active{
 
 .shapes2, .shapes3{
 	margin-left:5px;
-	border:solid black;
-	//color:white;
+	border:solid;
+	border-color: transparent transparent transparent transparent ;
 }
 
 .shapes2:hover, .shapes3:hover{

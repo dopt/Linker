@@ -69,6 +69,10 @@ function init(){
 		}
 	}
 	
+	toolbox_events();
+}
+
+function toolbox_events(){
 	$("#link_mini").click(function(){
 		$("#minimize_tool").fadeToggle();
 	});
@@ -173,6 +177,7 @@ function init(){
 		tool_repos = false;
 		adv_repos = false;
 	});
+	
 }
 
 function id_tooltip(content, id, id_2){
@@ -218,9 +223,76 @@ function tog_tool_box(){
 	}
 }
 
+function tool_box_hreset(){
+	
+	var new_content = "";
+	new_content += "<button id='link_mini'>-</button>";
+	new_content += "<button id='link_trans' onclick='tool_trans();'>~</button>";
+	new_content += " <span id='link_repos'><b>Link Box</b></span>";
+	
+	new_content += "<span id='minimize_tool'>";
+	
+	new_content += "<span style='position:absolute;right:20px;'> Width <input id='c_width' style='width:30px;' onkeyup='manually_adjust_frame(id)'>";
+	new_content += "Height <input id='c_height' style='width:30px;' onkeyup='manually_adjust_frame(id)'></span><br/>";
+	new_content += " <button onclick='clean_canvas();'>New</button>";
+	//new_content += "<button>Open</button>";
+	new_content += "<button onclick='save_img();'>Save</button>";
+	
+	new_content += " <span id='mouse_track'>0, 0</span><br/>";
+	
+	new_content += " <button id='chead_button' onclick='create_head();'>Create Head</button>";
+	
+	new_content += "<span style='margin-left:15px;'>";
+	new_content += "Name <textarea rows='1' id='head_name' onkeyup='update_name(this.id);' style='width:140px; height:12px;'></textarea>";
+	new_content += " Shape";
+	new_content += "<span id='c1' class='selected_shapes' onclick='shape_select(this.id);'><img src='img/circle.png'width='15'></span>";//circle
+	new_content += "<span id='o1' class='shapes' onclick='shape_select(this.id);'><img src='img/oval.png' width='15'></span>";//oval
+	new_content += "<span id='q1' class='shapes' onclick='shape_select(this.id);'><img src='img/quad.png' width='15'></span>";//quadrilateral
+	new_content += "<span id='p1' class='shapes' onclick='shape_select(this.id);'><img src='img/paral.png' width='15'></span>";//parellellogram
+	new_content += "<span id='d1' class='shapes' onclick='shape_select(this.id);'><img src='img/diamond.png' width='15'></span>";//diamond
+	new_content += "Font Size <input id='font_size_form' type=text style='width:30px;' onkeyup='change_font2();'>";
+	new_content += "</span>";
+	
+	new_content += "<br/><button id='ctail_button' onclick='create_tail();'>Create Tail</button>";
+	
+	new_content += "<span style='margin-left:15px;'>";
+	new_content += "Name <textarea rows='1' id='tail_name' style='width:140px; height:12px;'></textarea>";
+	new_content += "Shape";
+	new_content += "<span id='c2' class='selected_shapes2' onclick='shape_select2(this.id);'><img src='img/circle.png' width='15'></span>";//circle
+	new_content += "<span id='o2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/oval.png' width='15'></span>";//oval
+	new_content += "<span id='q2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/quad.png' width='15'></span>";//quadrilateral
+	new_content += "<span id='p2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/paral.png' width='15'></span>";//parellellogram
+	new_content += "<span id='d2' class='shapes2' onclick='shape_select2(this.id);'><img src='img/diamond.png' width='15'></span>";//diamond
+	new_content += "";
+	new_content += "<button onclick='arrow_default();'>Default</button>";
+	new_content += " Arrow<input id='has_arrow' type='checkbox' checked='checked'>";
+	new_content += "<span id='line90_tt'><input name='line' id='line_type' type='radio' >Line 90&#176;</span>";
+	
+	new_content += "<span id='top_down_tt'><input name='line' id='top_down_type' type='radio'>Top-Down</span>";
+	new_content += "</span>";
+	
+	new_content += "</span>";
+	document.getElementById("tool_box").innerHTML = new_content;
+}
+
+function tool_trans(){
+	if(document.getElementById("tool_box").className == "v"){
+		document.getElementById("tool_box").className = "h";
+		tool_box_hreset();
+		toolbox_events();
+	} else {
+		document.getElementById("tool_box").className = "v";
+		tool_box_reset();
+		toolbox_events();
+	}
+	document.getElementById("c_width").value = canvas.width;
+	document.getElementById("c_height").value = canvas.height;
+}
+
 function tool_box_reset(){
 	var new_content = "";
 	new_content += "<button id='link_mini'>-</button>";
+	new_content += "<button id='link_trans' onclick='tool_trans();'>~</button>";
 	new_content += "<span id='link_repos'><b>Link Box</b></span><br/>";
 	
 	new_content += "<span id='minimize_tool'>";
@@ -279,7 +351,7 @@ function arrow_default(){
 }
 
 function clean_canvas(){
-	init();
+	//init();
 	shapes = [];
 	links = [];
 }
