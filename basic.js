@@ -105,9 +105,20 @@ function init(){
 	$("#top_down_tt").hover(function(e){
 		//tooltip
 		var content = "<b>Click to select top-down type linker.</b><br/>";
+		content += "This linker has no arrow.";
 		content += "<div style='font-size:0.7em;'>Single Press for height adjustment.<br/>";
 		content += "Double click to unified the height of line in same level of branch.</div>";
 		id_tooltip(content, "tool_box", "top_down_tt");
+	}, 
+	function(){
+		$("#tooltip").fadeTo("normal",0);
+	});
+	
+	$("#line90_tt").hover(function(e){
+		//tooltip
+		var content = "<b>Click to select horizontal and vertical type linker.</b><br/>";
+		content += "Only this linker has additional truth/false value.";
+		id_tooltip(content, "tool_box", "line90_tt");
 	}, 
 	function(){
 		$("#tooltip").fadeTo("normal",0);
@@ -242,7 +253,7 @@ function tool_box_reset(){
 	new_content += "<br/>";
 	new_content += "<button onclick='arrow_default();'>Default</button>";
 	new_content += " Arrow<input id='has_arrow' type='checkbox' checked='checked'><br/>";
-	new_content += "<input name='line' id='line_type' type='radio' >Line 90&#176;<br/>";
+	new_content += "<span id='line90_tt'><input name='line' id='line_type' type='radio' >Line 90&#176;</span><br/>";
 	
 	new_content += "<span id='top_down_tt'><input name='line' id='top_down_type' type='radio'>Top-Down</span>";
 	new_content += "</div>";
