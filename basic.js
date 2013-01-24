@@ -279,10 +279,16 @@ function tool_trans(){
 	if(document.getElementById("tool_box").className == "v"){
 		document.getElementById("tool_box").className = "h";
 		tool_box_hreset();
+		//css reset
+		$("#tool_box").css("left", 10);
+		$("#tool_box").css("top", 10);
 		toolbox_events();
 	} else {
 		document.getElementById("tool_box").className = "v";
 		tool_box_reset();
+		//css reset
+		//$("#tool_box").css("right", 22);
+		$("#tool_box").css("top", 10);
 		toolbox_events();
 	}
 	document.getElementById("c_width").value = canvas.width;
